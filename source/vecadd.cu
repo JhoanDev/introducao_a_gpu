@@ -12,7 +12,6 @@ __global__ void Vec_add(
 {
     int my_elt = blockDim.x * blockIdx.x + threadIdx.x;
 
-    /* total threads = blk_ct * th_per_blk pode ser > n */
     if (my_elt < n)
     {
         z[my_elt] = x[my_elt] + y[my_elt];
@@ -66,12 +65,10 @@ void Allocate_vectors(
     int n         /* in */
 )
 {
-    /* x, y, e z são usados no host e no dispositivo */
     cudaMallocManaged(x_p, n * sizeof(float));
     cudaMallocManaged(y_p, n * sizeof(float));
     cudaMallocManaged(z_p, n * sizeof(float));
 
-    /* cz é usado apenas no host */
     *cz_p = (float *)malloc(n * sizeof(float));
 
 } /* Allocate_vectors */
@@ -101,12 +98,10 @@ void Free_vectors(
     float *cz /* in/out */
 )
 {
-    /* Alocado com cudaMallocManaged */
     cudaFree(x);
     cudaFree(y);
     cudaFree(z);
 
-    /* Alocado com malloc */
     free(cz);
 
 } /* Free_vectors */
@@ -130,21 +125,17 @@ int main(int argc, char *argv[])
     float *x, *y, *z, *cz;
     double diff_norm;
 
-    /* Obter os argumentos da linha de comando e configurar os vetores */
     Get_args(argc, argv, &n, &blk_ct, &th_per_blk);
     Allocate_vectors(&x, &y, &z, &cz, n);
     Init_vectors(x, y, n);
 
-    /* Invocar o kernel e esperar que ele termine */
     Vec_add<<<blk_ct, th_per_blk>>>(x, y, z, n);
     cudaDeviceSynchronize();
 
-    /* Verificar se o resultado está correto */
     Serial_vec_add(x, y, cz, n);
     diff_norm = Two_norm_diff(z, cz, n);
     printf("Norma-2 da diferença entre host e dispositivo = %e\n", diff_norm);
 
-    /* Liberar o armazenamento e sair */
     Free_vectors(x, y, z, cz);
     return 0;
 } /* main */

@@ -11,8 +11,6 @@ __global__ void Vec_add(
 )
 {
     int my_elt = blockDim.x * blockIdx.x + threadIdx.x;
-
-    /* total threads = blk_ct * th_per_blk pode ser > n */
     if (my_elt < n)
     {
         z[my_elt] = x[my_elt] + y[my_elt];
@@ -59,15 +57,15 @@ void Get_args(
 }
 
 void Allocate_vectors(
-    float** hx_p,     /* out */
-    float** hy_p,     /* out */
-    float** hz_p,     /* out */
-    float** cz_p,     /* out */
-    float** dx_p,     /* out */
-    float** dy_p,     /* out */
-    float** dz_p,     /* out */
-    int n             /* in */
-) 
+    float **hx_p, /* out */
+    float **hy_p, /* out */
+    float **hz_p, /* out */
+    float **cz_p, /* out */
+    float **dx_p, /* out */
+    float **dy_p, /* out */
+    float **dz_p, /* out */
+    int n         /* in */
+)
 {
     /* dx, dy, e dz são usados no dispositivo */
     cudaMalloc(dx_p, n * sizeof(float));
@@ -75,10 +73,10 @@ void Allocate_vectors(
     cudaMalloc(dz_p, n * sizeof(float));
 
     /* hx, hy, hz, cz são usados no host */
-    *hx_p = (float*)malloc(n * sizeof(float));
-    *hy_p = (float*)malloc(n * sizeof(float));
-    *hz_p = (float*)malloc(n * sizeof(float));
-    *cz_p = (float*)malloc(n * sizeof(float));
+    *hx_p = (float *)malloc(n * sizeof(float));
+    *hy_p = (float *)malloc(n * sizeof(float));
+    *hz_p = (float *)malloc(n * sizeof(float));
+    *cz_p = (float *)malloc(n * sizeof(float));
 
 } /* Allocate_vectors */
 
@@ -130,10 +128,11 @@ void Init_vectors(float *x,
     }
 }
 
-int main(int argc, char* argv[]) {
+int main(int argc, char *argv[])
+{
     int n, th_per_blk, blk_ct;
     float *hx, *hy, *hz, *cz; /* Vetores do Host */
-    float *dx, *dy, *dz;     /* Vetores do Dispositivo */
+    float *dx, *dy, *dz;      /* Vetores do Dispositivo */
     double diff_norm;
 
     Get_args(argc, argv, &n, &blk_ct, &th_per_blk);
